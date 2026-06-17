@@ -1,0 +1,59 @@
+# Core LangChain
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+
+# Mistral
+mistralai
+
+# Embeddings
+sentence-transformers
+transformers
+torch
+
+# Vector Database
+chromadb
+
+# Document Loaders
+unstructured
+pymupdf
+pypdf
+python-docx
+beautifulsoup4
+html2text
+
+# FastAPI Backend
+fastapi
+uvicorn
+
+# Environment Variables
+python-dotenv
+
+# Utilities
+numpy
+pandas
+tqdm
+
+# Token Counting
+tiktoken
+
+# Reranking
+flagembedding
+
+# HTTP
+requests
+httpx
+
+# Monitoring & Logging
+loguru
+
+# JSON handling
+orjson
+
+# Optional OCR
+pytesseract
+Pillow
+
+# Optional Streamlit UI
+streamlit
