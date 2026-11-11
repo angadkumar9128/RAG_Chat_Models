@@ -567,3 +567,150 @@ No license file is currently present in this repository. Until a license is adde
 ---
 
 **If you find this project useful, consider starring the repository, reporting issues, and contributing improvements.**
+
+
+## Additional architecture diagrams
+
+These diagrams distinguish the **current implementation** from the **proposed future architecture**. The future diagrams are design targets, not claims that those components are already implemented.
+
+### 1. Current project architecture
+
+This view shows the existing standalone scripts and their shared role as examples for interacting with different language-model providers.
+
+```mermaid
+flowchart TB
+    U[Developer / User]
+    U --> CLI[Python command-line examples]
+    U --> UI[Streamlit chat interface]
+    U --> PDF[PDF summarization example]
+    CLI --> M[Mistral model]
+    UI --> M
+    PDF --> PL[PyPDFLoader]
+    PL --> PP[Select and prepare page content]
+    PP --> PT[Chat prompt template]
+    PT --> M
+    CLI --> G[Gemini example]
+    CLI --> GR[Groq example]
+    CLI --> OR[OpenRouter example]
+    M --> R[Generated response]
+    G --> R
+    GR --> R
+    OR --> R
+    R --> OUT[Terminal or Streamlit output]
+```
+
+**How to read it:** users run an individual Python script or launch the Streamlit interface. The selected script calls its configured model provider and displays the generated response. The PDF example loads a PDF page, places its text into a prompt, and asks the Mistral model to summarize it.
+
+### 2. Model-provider interaction
+
+The repository contains separate examples for Mistral, Gemini, Groq, and OpenRouter. Each example constructs a provider-specific LangChain chat model and sends it a prompt.
+
+```mermaid
+flowchart LR
+    Q[User prompt] --> S[Selected example script]
+    S --> LC[LangChain provider integration]
+    LC --> D{Chosen provider}
+    D -->|Mistral| MI[Mistral API]
+    D -->|Gemini| GE[Google Gemini API]
+    D -->|Groq| GR[Groq API]
+    D -->|OpenRouter| OR[OpenRouter API]
+    MI --> RESP[Model response]
+    GE --> RESP
+    GR --> RESP
+    OR --> RESP
+    RESP --> DISPLAY[Print or display response]
+```
+
+The provider is selected by running the corresponding script; this is not yet a unified provider switcher or automatic failover system.
+
+### 3. PDF summarization workflow (current example)
+
+```mermaid
+flowchart TD
+    A[Run main.py] --> B[PyPDFLoader reads configured PDF]
+    B --> C[Extract document pages]
+    C --> D[Select the page used by the example]
+    D --> E[Build summary prompt]
+    E --> F[Send prompt to Mistral]
+    F --> G[Receive generated summary]
+    G --> H[Print summary]
+```
+
+**Current scope:** the example demonstrates PDF loading and LLM-based summarization. It currently uses a locally configured file path and selects a specific page; it is not yet a general-purpose multi-document RAG pipeline.
+
+### 4. Streamlit chat workflow (current example)
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Streamlit UI
+    participant State as Streamlit session state
+    participant Model as Mistral chat model
+    User->>UI: Enter a message
+    UI->>State: Add user message
+    UI->>Model: Invoke model with current prompt
+    Model-->>UI: Return response
+    UI->>State: Add assistant response
+    UI-->>User: Display conversation
+    User->>UI: Clear chat (optional)
+    UI->>State: Reset chat messages
+```
+
+The current UI keeps displayed messages in Streamlit session state. The current implementation sends the latest prompt to the model rather than providing the full prior conversation as model context, so persistent conversational memory is a future improvement.
+
+### 5. Proposed RAG ingestion architecture (future enhancement)
+
+A Retrieval-Augmented Generation (RAG) pipeline first prepares documents and indexes their chunks. This is a proposed contribution, not functionality currently completed in the repository.
+
+```mermaid
+flowchart TD
+    A[PDF / TXT / DOCX documents] --> B[Document loaders]
+    B --> C[Extract text and metadata]
+    C --> D[Clean and normalize text]
+    D --> E[Split text into chunks]
+    E --> F[Embedding model]
+    F --> G[Vector representations]
+    G --> H[(ChromaDB vector store)]
+    H --> I[Indexed knowledge base]
+```
+
+### 6. Proposed RAG question-answering architecture (future enhancement)
+
+```mermaid
+flowchart TD
+    U[User question] --> Q[Question processing]
+    Q --> E[Create query embedding]
+    E --> V[(ChromaDB vector store)]
+    V --> R[Retrieve relevant chunks]
+    R --> C[Build context with source metadata]
+    C --> P[Prompt template]
+    P --> L[Selected LLM provider]
+    L --> A[Grounded answer]
+    A --> S[Display answer and source references]
+```
+
+In this design, retrieved document passages are supplied to the language model as context. The application should show source references and clearly indicate when the indexed documents do not contain enough information to answer.
+
+### 7. Proposed deployment architecture (future enhancement)
+
+```mermaid
+flowchart TB
+    USER[Browser / End user] --> WEB[Streamlit or frontend]
+    WEB --> API[Optional FastAPI service]
+    API --> ORCH[Application and RAG orchestration]
+    ORCH --> RET[Retriever]
+    RET --> VS[(Vector database)]
+    ORCH --> LLM[LLM provider adapter]
+    LLM --> PROVIDERS[External model APIs]
+    ORCH --> DOCS[Document ingestion service]
+    DOCS --> STORE[(Document storage)]
+    DOCS --> VS
+    CFG[Environment configuration and secrets] -.-> API
+    CFG -.-> ORCH
+```
+
+This is a possible production-oriented direction. FastAPI, a separate ingestion service, external document storage, and a deployed vector database should be treated as future work until implemented and configured.
+
+### Diagram maintenance
+
+When contributing code, update the relevant **current implementation** diagram if behavior changes. Keep planned components in the future-architecture sections until they are actually implemented. Mermaid diagrams can be previewed in GitHub Markdown and in compatible Markdown editors.
