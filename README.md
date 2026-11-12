@@ -2,6 +2,8 @@
 
 A Python learning and experimentation project for interacting with multiple Large Language Model (LLM) providers through **LangChain**. It contains standalone model examples, a Streamlit chat interface, and introductory PDF/text document-loading scripts.
 
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/angadkumar9128/RAG_Chat_Models)
+
 > **Project status:** This repository is currently an LLM integration and document-loading playground. Although the repository name is RAG Chat Models, a complete Retrieval-Augmented Generation (RAG) workflow is not implemented yet. The current code does not connect document chunking, embeddings, vector storage, retrieval, and grounded answer generation into one application. The future enhancements section describes how contributors can help build those capabilities.
 
 ---
